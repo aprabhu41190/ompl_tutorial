@@ -5,8 +5,16 @@ project(ompl_tutorial)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  OMPL
+    roscpp
+    geometry_msgs
+    std_msgs
+    message_generation
+    OMPL
+    moveit_ros_planning_interface
 )
+
+find_package(cmake_modules REQUIRED)
+find_package(Eigen REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -79,9 +87,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES ompl_tutorial
-#  CATKIN_DEPENDS OMPL
-#  DEPENDS system_lib
+  LIBRARIES ompl_tutorial
+  CATKIN_DEPENDS ompl
+  DEPENDS system_lib
 )
 
 ###########
@@ -91,8 +99,12 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
+include_directories(include)
 include_directories(
-  ${catkin_INCLUDE_DIRS}
+    include SYSTEM
+    ${catkin_INCLUDE_DIRS}
+    ${Eigen_INCLUDE_DIRS}
+    ${OMPL_INCLUDE_DIRS}
 )
 
 ## Declare a cpp library

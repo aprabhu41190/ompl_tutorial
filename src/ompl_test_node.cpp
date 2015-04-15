@@ -4,12 +4,22 @@
 #include <ompl/base/objectives/MaximizeMinClearanceObjective.h>
 #include <ompl/base/spaces/RealVectorStateSpace.h>
 #include <ompl/geometric/planners/rrt/RRTstar.h>
+// ROS
+#include <ros/ros.h>
 
 #include <fstream>
 
 //Create the namespaces
 namespace ob = ompl::base ;
 namespace og = ompl::geometric ;
+
+#define UNUSED(x) (void)(x)
+
+void dealocate_StateValidityChecker_fn(ompl::base::StateValidityChecker* p)
+{
+    std::cout << ">>>>>>>>>>>>>>>Deallocate>>>>>>>>>>>>" << std::endl ;
+    UNUSED(p);
+}
 
 //Class to check the validity of the states
 class ValidityChecker : public ob::StateValidityChecker
@@ -21,7 +31,9 @@ public:
     //Function to check if state is valid
     bool isValid(const ob::State* state) const
     {
-        return this->clearance(state) > 0.0 ;
+        //sleep(5) ;
+        //std::cout << ">>>>>>>>>>>>>>>Valid State>>>>>>>>>>>>" << std::endl ;
+        return true  ;
     }
 
     //Function to calculate distance of state from obstacle
@@ -52,9 +64,11 @@ void plan(int argc, char** argv)
     ob::SpaceInformationPtr si_ptr(new ob::SpaceInformation(r_space)) ;
 
     //Use the object to check for validity of states
-    si_ptr->setStateValidityChecker(ob::StateValidityCheckerPtr(new ValidityChecker(si_ptr))) ;
-
-    si_ptr->setup() ;
+    ValidityChecker checker(si_ptr) ;
+    ompl::base::StateValidityCheckerPtr validity_checker(&checker, dealocate_StateValidityChecker_fn);
+    si_ptr->setStateValidityChecker(validity_checker);
+    si_ptr->setStateValidityCheckingResolution(0.03); // 3%
+    si_ptr->setup();
 
     //Set robot start state
     ob::ScopedState<> start(r_space) ;
@@ -64,9 +78,9 @@ void plan(int argc, char** argv)
 
     //Set robot goal state
     ob::ScopedState<> goal(r_space) ;
-    goal->as<ob::RealVectorStateSpace::StateType>()->values[0] = 1.0 ;
-    goal->as<ob::RealVectorStateSpace::StateType>()->values[1] = 1.0 ;
-    goal->as<ob::RealVectorStateSpace::StateType>()->values[2] = 1.0 ;
+    goal->as<ob::RealVectorStateSpace::StateType>()->values[0] = 6.0 ;
+    goal->as<ob::RealVectorStateSpace::StateType>()->values[1] = 6.0 ;
+    goal->as<ob::RealVectorStateSpace::StateType>()->values[2] = 6.0 ;
 
     //Create instance of problem definition
     ob::ProblemDefinitionPtr pd(new ob::ProblemDefinition(si_ptr)) ;
